@@ -13,33 +13,24 @@ export class TasksService {
     private tasksRepository: Repository<Task>,
   ) {}
 
-  async getAllTasks(): Promise<Task[]> {
-    return this.tasksRepository.find();
+  async getTasks(filterDto: GetTasksFilterDto): Promise<Task[]> {
+    const query = this.tasksRepository.createQueryBuilder('task');
+    const { status, search } = filterDto;
+
+    if (status) {
+      query.andWhere('task.status = :status', { status });
+    }
+    if (search) {
+      query.andWhere(
+        '(task.description LIKE :search OR task.title LIKE :search)',
+        { search: `%${search}` },
+      );
+    }
+    const tasks = await query.getMany();
+    console.log(query.getSql());
+
+    return tasks;
   }
-
-  // getAllTasks(): Task[] {
-  //   return this.tasks;
-  // }
-
-  // getTasksWithFilters(filterDto: GetTasksFilterDto): Task[] {
-  //   const { status, search } = filterDto;
-  //   let tasks = this.getAllTasks();
-
-  //   if (status) {
-  //     tasks = tasks.filter((task) => task.status === status);
-  //   }
-
-  //   if (search) {
-  //     tasks = tasks.filter((task) => {
-  //       if (task.title.includes(search) || task.description.includes(search)) {
-  //         return true;
-  //       }
-  //       return false;
-  //     });
-  //   }
-
-  //   return tasks;
-  // }
 
   async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
     const { title, description } = createTaskDto;
@@ -69,9 +60,10 @@ export class TasksService {
     }
   }
 
-  // updateTaskStatus(id: string, status: TaskStatus): Task {
-  //   const task = this.getTaskById(id);
-  //   task.status = status;
-  //   return task;
-  // }
+  async updateTaskStatus(id: string, status: TaskStatus): Promise<Task> {
+    const task = await this.getTaskById(id);
+    task.status = status;
+    await this.tasksRepository.save(task);
+    return task;
+  }
 }

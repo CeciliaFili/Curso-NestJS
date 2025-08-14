@@ -4,9 +4,9 @@ import { TaskStatus } from '../task-status.enum';
 export class GetTasksFilterDto {
   @IsOptional()
   @IsString()
-  search?: TaskStatus;
+  search?: string;
 
   @IsOptional()
   @IsEnum(TaskStatus)
-  status?: string;
+  status?: TaskStatus;
 }
