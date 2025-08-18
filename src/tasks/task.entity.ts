@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 import { TaskStatus } from './task-status.enum';
+import { isEnum } from 'class-validator';
 
 @Entity()
 export class Task {
@@ -12,6 +13,7 @@ export class Task {
   @Column()
   description: string;
 
-  @Column()
+  @Column({ type: 'enum', enum: TaskStatus, default: TaskStatus.OPEN })
+  @Index()
   status: TaskStatus;
 }

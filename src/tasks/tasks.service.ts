@@ -5,6 +5,7 @@ import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './task.entity';
 import { Repository } from 'typeorm';
+import { UpdateResult } from 'typeorm/browser';
 
 @Injectable()
 export class TasksService {
@@ -27,7 +28,6 @@ export class TasksService {
       );
     }
     const tasks = await query.getMany();
-    console.log(query.getSql());
 
     return tasks;
   }
@@ -60,10 +60,13 @@ export class TasksService {
     }
   }
 
-  async updateTaskStatus(id: string, status: TaskStatus): Promise<Task> {
-    const task = await this.getTaskById(id);
-    task.status = status;
-    await this.tasksRepository.save(task);
-    return task;
+  async updateTaskStatus(id: string, status: TaskStatus): Promise<string> {
+    const result = await this.tasksRepository.update(id, { status });
+    console.log('result', result);
+    if (!result.affected || result.affected === 0) {
+      throw new NotFoundException(`Task with ID "${id}" not found`);
+    }
+
+    return `Task with ID "${id}" updated successfully`;
   }
 }

@@ -14,6 +14,7 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 import { updateTaskStatusDto } from './dto/update-task-status.dto';
 import { Task } from './task.entity';
+import { UpdateResult } from 'typeorm';
 
 @Controller('tasks')
 export class TasksController {
@@ -43,7 +44,7 @@ export class TasksController {
   updateTaskStatus(
     @Param('id') id: string,
     @Body() updateTaskStatusDto: updateTaskStatusDto,
-  ): Promise<Task> {
+  ): Promise<string> {
     const { status } = updateTaskStatusDto;
     return this.tasksService.updateTaskStatus(id, status);
   }
