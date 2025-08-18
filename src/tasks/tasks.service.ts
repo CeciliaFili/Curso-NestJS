@@ -15,9 +15,10 @@ export class TasksService {
     private tasksRepository: Repository<Task>,
   ) {}
 
-  async getTasks(filterDto: GetTasksFilterDto): Promise<Task[]> {
+  async getTasks(filterDto: GetTasksFilterDto, user: User): Promise<Task[]> {
     const query = this.tasksRepository.createQueryBuilder('task');
     const { status, search } = filterDto;
+    query.where({ user });
 
     if (status) {
       query.andWhere('task.status = :status', { status });
