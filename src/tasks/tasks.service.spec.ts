@@ -3,6 +3,7 @@ import { TasksService } from './tasks.service';
 import { Repository } from 'typeorm';
 import { Task } from './task.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { NotFoundException } from '@nestjs/common';
 
 const mockTasksRepository = () => ({
   createQueryBuilder: jest.fn(),
@@ -12,6 +13,12 @@ const mockTasksRepository = () => ({
   delete: jest.fn(),
   update: jest.fn(),
 });
+const mockUser = {
+  username: 'Ariel',
+  id: 'someId',
+  password: 'somePassword',
+  tasks: [],
+};
 
 describe('TasksService', () => {
   let tasksService: TasksService;
@@ -99,14 +106,21 @@ describe('TasksService', () => {
         title: 'mitarea',
         status: 'miestado',
         description: 'midescripcion',
-        user: { id: '1' },
+        user: mockUser,
       };
 
       tasksRepository.findOne.mockResolvedValue(task);
 
-      const result = await tasksService.getTaskById('123', { id: '1' });
+      const result = await tasksService.getTaskById('123', mockUser);
 
       expect(task).toEqual(result);
+    });
+    it('calls getTaskById and handles an error', async () => {
+      tasksRepository.findOne.mockResolvedValue(null);
+
+      await expect(
+        tasksService.getTaskById('someId', mockUser),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });
