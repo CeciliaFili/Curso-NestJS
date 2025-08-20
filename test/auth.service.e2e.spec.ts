@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from './auth.service';
-import { AppModule } from '../app.module';
+import { AuthService } from '../src/auth/auth.service';
+import { AppModule } from '../src/app.module';
 import { DataSource } from 'typeorm';
 import { INestApplication } from '@nestjs/common';
-import { User } from '../auth/user.entity';
+import { User } from '../src/auth/user.entity';
 import request from 'supertest';
 
 describe('AuthService E2E', () => {

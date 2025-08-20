@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
-import { TasksService } from '../tasks/tasks.service';
+import { TasksService } from 'src/tasks/tasks.service';
 import { Repository } from 'typeorm';
-import { Task } from '../tasks/task.entity';
+import { Task } from 'src/tasks/task.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
 
