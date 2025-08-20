@@ -17,10 +17,6 @@ import { configValidationSchema } from './config.schema';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
         return {
-          // ssl: isProduction,
-          // extra: {
-          //   ssl: isProduction ? { rejectUnauthorized: false } : null,
-          // },
           type: 'postgres',
           autoLoadEntities: true,
           synchronize: true,

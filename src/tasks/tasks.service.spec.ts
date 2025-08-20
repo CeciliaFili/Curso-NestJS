@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
-import { TasksService } from './tasks.service';
+import { TasksService } from '../tasks/tasks.service';
 import { Repository } from 'typeorm';
-import { Task } from './task.entity';
+import { Task } from '../tasks/task.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
 
@@ -24,7 +24,7 @@ describe('TasksService', () => {
   let tasksService: TasksService;
   let tasksRepository: jest.Mocked<Repository<Task>>;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module = await Test.createTestingModule({
       providers: [
         TasksService,
@@ -140,6 +140,20 @@ describe('TasksService', () => {
       await expect(tasksService.deleteTask('123', mockUser)).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+  describe('updateTaskStatus', () => {
+    it('update status of an existing task', async () => {
+      tasksRepository.update.mockResolvedValue({ affected: 1 });
+      await expect(
+        tasksService.updateTaskStatus('123', 'DONE', mockUser),
+      ).resolves.not.toThrow();
+    });
+    it('update status of a non existing task and throws an error', async () => {
+      tasksRepository.update.mockResolvedValue({ affected: 0 });
+      await expect(
+        tasksService.updateTaskStatus('123', 'DONE', mockUser),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });
