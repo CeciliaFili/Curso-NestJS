@@ -123,4 +123,23 @@ describe('TasksService', () => {
       ).rejects.toThrow(NotFoundException);
     });
   });
+  describe('deleteTask', () => {
+    it('deletes a Task successfully', async () => {
+      tasksRepository.delete.mockResolvedValue({ affected: 1 });
+      await expect(
+        tasksService.deleteTask('123', mockUser),
+      ).resolves.not.toThrow();
+      expect(tasksRepository.delete).toHaveBeenCalledWith({
+        id: '123',
+        user: mockUser,
+      });
+    });
+    it('throws an error if task not found', async () => {
+      tasksRepository.delete.mockResolvedValue({ affected: 0 });
+
+      await expect(tasksService.deleteTask('123', mockUser)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
 });
