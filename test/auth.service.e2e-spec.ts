@@ -5,6 +5,7 @@ import { DataSource } from 'typeorm';
 import { INestApplication } from '@nestjs/common';
 import { User } from '../src/auth/user.entity';
 import request from 'supertest';
+import * as bcrypt from 'bcrypt';
 
 describe('AuthService E2E', () => {
   let app: INestApplication;
@@ -57,19 +58,19 @@ describe('AuthService E2E', () => {
 
     it('creates an user with an existing username and throws an error', async () => {
       const usersRepository = dataSource.getRepository(User);
-      const newUser = {
+      const credentials = {
         username: 'user2',
         password: 'password2',
       };
-
-      await request(app.getHttpServer())
-        .post('/auth/signup')
-        .send(newUser)
-        .expect(201);
+      const newUser = usersRepository.create({
+        username: credentials.username,
+        password: await bcrypt.hash(credentials.password, 10),
+      });
+      await usersRepository.save(newUser);
 
       const badRequest = await request(app.getHttpServer())
         .post('/auth/signup')
-        .send(newUser)
+        .send(credentials)
         .expect(409);
 
       expect(badRequest.body.message).toBe('Username already exists');
@@ -81,24 +82,26 @@ describe('AuthService E2E', () => {
 
   describe('signIn', () => {
     it('signs in successfully', async () => {
-      const newUser = {
+      const usersRepository = dataSource.getRepository(User);
+      const credentials = {
         username: 'user2',
         password: 'password2',
       };
-
-      await request(app.getHttpServer())
-        .post('/auth/signup')
-        .send(newUser)
-        .expect(201);
+      const newUser = usersRepository.create({
+        username: credentials.username,
+        password: await bcrypt.hash(credentials.password, 10),
+      });
+      await usersRepository.save(newUser);
 
       await request(app.getHttpServer())
         .post('/auth/signin')
-        .send(newUser)
+        .send(credentials)
         .expect(201);
     });
 
     it('signs in with wrong credentials', async () => {
-      const newUser = {
+      const usersRepository = dataSource.getRepository(User);
+      const credentials = {
         username: 'user2',
         password: 'password2',
       };
@@ -108,10 +111,11 @@ describe('AuthService E2E', () => {
         password: '444',
       };
 
-      await request(app.getHttpServer())
-        .post('/auth/signup')
-        .send(newUser)
-        .expect(201);
+      const newUser = usersRepository.create({
+        username: credentials.username,
+        password: await bcrypt.hash(credentials.password, 10),
+      });
+      await usersRepository.save(newUser);
 
       const badRequest = await request(app.getHttpServer())
         .post('/auth/signin')
