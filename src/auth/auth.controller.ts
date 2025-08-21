@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AuthCredentialsDto } from '../tasks/dto/auth-credentials.dto';
 import { AuthService } from './auth.service';
 
@@ -16,5 +16,10 @@ export class AuthController {
     @Body() authCredentialsDto: AuthCredentialsDto,
   ): Promise<{ accessToken: string }> {
     return this.authService.signIn(authCredentialsDto);
+  }
+
+  @Get('/greeting')
+  greetings() {
+    return 'Hello';
   }
 }

@@ -78,6 +78,25 @@ describe('AuthService E2E', () => {
       const savedUsers = await usersRepository.find();
       expect(savedUsers).toHaveLength(1);
     });
+    it('says hello', async () => {
+      const usersRepository = dataSource.getRepository(User);
+      const credentials = {
+        username: 'user2',
+        password: 'password2',
+      };
+      const newUser = usersRepository.create({
+        username: credentials.username,
+        password: await bcrypt.hash(credentials.password, 10),
+      });
+      await usersRepository.save(newUser);
+
+      const request = await request(app.getHttpServer())
+        .post('/auth/greetings')
+        .send(credentials)
+        .expect(201);
+
+      expect(request.body).toBe('Hello');
+    });
   });
 
   describe('signIn', () => {
