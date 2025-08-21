@@ -15,9 +15,9 @@ jobs:
         ports:
           - 5432:5432
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: task_management_test
+          POSTGRES_USER: ${{ secrets.DB_USERNAME_TEST }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD_TEST }}
+          POSTGRES_DB: ${{ secrets.DB_DATABASE_TEST }}
         options: >-
           --health-cmd "pg_isready -U postgres"
           --health-interval 10s
@@ -28,10 +28,10 @@ jobs:
       STAGE: test
       DB_HOST: localhost
       DB_PORT: 5432
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-      DB_DATABASE: task_management_test
-      JWT_SECRET: KxartlkDkiOpmHwDFlPZbrtfKedeOUVmhXbnosLcJQElxiWLuY
+      DB_USERNAME: ${{ secrets.DB_USERNAME_TEST }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD_TEST }}
+      DB_DATABASE: ${{ secrets.DB_DATABASE_TEST }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET_TEST }}
 
     steps:
       - name: Checkout repository
