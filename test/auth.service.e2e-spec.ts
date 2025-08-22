@@ -117,7 +117,7 @@ describe('AuthService E2E', () => {
         .send(testUserCredentials)
         .expect(200);
 
-      expect(response.text).toBe('Hello!');
+      expect(response.text).toBe('Hello user!');
     });
   });
 });

@@ -20,6 +20,6 @@ export class AuthController {
 
   @Get('/greetings')
   greetings() {
-    return 'Hello!';
+    return 'Hello user!';
   }
 }
