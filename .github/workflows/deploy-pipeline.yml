@@ -1,0 +1,31 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Configurar clave SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "$EC2_SSH_KEY" > ~/.ssh/github_ec2_deploy
+          chmod 600 ~/.ssh/github_ec2_deploy
+          ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+
+      - name: Deploy en EC2
+        run: |
+          ssh -i ~/.ssh/github_ec2_deploy ubuntu@$EC2_HOST << 'EOF'
+            cd ~/Curso-NestJS
+            git pull origin main
+            yarn install --frozen-lockfile
+            yarn build
+            yarn start:prod
+          EOF
