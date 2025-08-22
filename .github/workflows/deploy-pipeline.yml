@@ -15,9 +15,6 @@ jobs:
       EC2_HOST: ${{ secrets.EC2_HOST }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
       - name: Configurar clave SSH
         run: |
           mkdir -p ~/.ssh
@@ -29,8 +26,9 @@ jobs:
         run: |
           ssh -i ~/.ssh/github_ec2_deploy ubuntu@$EC2_HOST << 'EOF'
             cd ~/Curso-NestJS
+            pkill -f "node dist/main.js" || true
             git pull origin main
             yarn install --frozen-lockfile
             yarn build
-            yarn start:prod
+            nohup yarn start:prod > app.log 2>&1 &
           EOF
