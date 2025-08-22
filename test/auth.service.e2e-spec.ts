@@ -10,7 +10,7 @@ import * as bcrypt from 'bcrypt';
 describe('AuthService E2E', () => {
   let app: INestApplication;
   let dataSource: DataSource;
-  let authService: AuthService;
+  const testUserCredentials = { username: 'user2', password: 'password2' };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -38,6 +38,15 @@ describe('AuthService E2E', () => {
     }
   });
 
+  async function createTestUser() {
+    const usersRepository = dataSource.getRepository(User);
+    const newUser = usersRepository.create({
+      username: testUserCredentials.username,
+      password: await bcrypt.hash(testUserCredentials.password, 10),
+    });
+    await usersRepository.save(newUser);
+  }
+
   describe('createUser', () => {
     it('creates an user successfully', async () => {
       const usersRepository = dataSource.getRepository(User);
@@ -58,19 +67,11 @@ describe('AuthService E2E', () => {
 
     it('creates an user with an existing username and throws an error', async () => {
       const usersRepository = dataSource.getRepository(User);
-      const credentials = {
-        username: 'user2',
-        password: 'password2',
-      };
-      const newUser = usersRepository.create({
-        username: credentials.username,
-        password: await bcrypt.hash(credentials.password, 10),
-      });
-      await usersRepository.save(newUser);
+      await createTestUser();
 
       const badRequest = await request(app.getHttpServer())
         .post('/auth/signup')
-        .send(credentials)
+        .send(testUserCredentials)
         .expect(409);
 
       expect(badRequest.body.message).toBe('Username already exists');
@@ -82,40 +83,21 @@ describe('AuthService E2E', () => {
 
   describe('signIn', () => {
     it('signs in successfully', async () => {
-      const usersRepository = dataSource.getRepository(User);
-      const credentials = {
-        username: 'user2',
-        password: 'password2',
-      };
-      const newUser = usersRepository.create({
-        username: credentials.username,
-        password: await bcrypt.hash(credentials.password, 10),
-      });
-      await usersRepository.save(newUser);
+      await createTestUser();
 
       await request(app.getHttpServer())
         .post('/auth/signin')
-        .send(credentials)
+        .send(testUserCredentials)
         .expect(201);
     });
 
-    it('signs in with wrong credentials', async () => {
-      const usersRepository = dataSource.getRepository(User);
-      const credentials = {
-        username: 'user2',
-        password: 'password2',
-      };
+    it('signs in with wrong testUserCredentials', async () => {
+      await createTestUser();
 
       const wrongCredentials = {
         username: 'user2',
         password: '444',
       };
-
-      const newUser = usersRepository.create({
-        username: credentials.username,
-        password: await bcrypt.hash(credentials.password, 10),
-      });
-      await usersRepository.save(newUser);
 
       const badRequest = await request(app.getHttpServer())
         .post('/auth/signin')
@@ -123,6 +105,19 @@ describe('AuthService E2E', () => {
         .expect(401);
 
       expect(badRequest.body.message).toBe('Please check your credentials');
+    });
+  });
+
+  describe('greetings', () => {
+    it('Says Hello!', async () => {
+      await createTestUser();
+
+      const response = await request(app.getHttpServer())
+        .get('/auth/greetings')
+        .send(testUserCredentials)
+        .expect(200);
+
+      expect(response.text).toBe('Hello!');
     });
   });
 });
